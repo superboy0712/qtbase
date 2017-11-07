@@ -68,6 +68,8 @@ private slots:
     void shortcutEvents();
     void stopRepeatTimer();
 
+    void mouseReleased(); // QTBUG-53244
+    void mouseRelease_data(); // QTBUG-53244
 #ifdef QT_KEYPAD_NAVIGATION
     void keyNavigation();
 #endif
@@ -563,6 +565,54 @@ void tst_QAbstractButton::stopRepeatTimer()
     QCOMPARE(button.timerEventCount(), 0);
 }
 
+void tst_QAbstractButton::mouseReleased() // QTBUG-53244
+{
+    MyButton button(nullptr);
+    button.setObjectName("button");
+    button.setGeometry(0, 0, 20, 20);
+    QSignalSpy spyPress(&button, &QAbstractButton::pressed);
+    QSignalSpy spyRelease(&button, &QAbstractButton::released);
+
+    QTest::mousePress(&button, Qt::LeftButton);
+    QCOMPARE(spyPress.count(), 1);
+    QCOMPARE(button.isDown(), true);
+    QCOMPARE(spyRelease.count(), 0);
+
+    QTest::mouseClick(&button, Qt::RightButton);
+    QCOMPARE(spyPress.count(), 1);
+    QCOMPARE(button.isDown(), true);
+    QCOMPARE(spyRelease.count(), 0);
+
+    QPointF posOutOfWidget = QPointF(30, 30);
+//    QTest::mouseMove(&button, posOutOfWidget, 200); // failed, not able to simulate drag event
+    QMouseEvent dragEvent(QEvent::MouseMove,
+                     posOutOfWidget, Qt::NoButton,
+                     Qt::MouseButtons(Qt::LeftButton),
+                     Qt::NoModifier);
+//    QDragMoveEvent dragMoveEvent(QPoint(30, 30),
+//                                 Qt::IgnoreAction,
+//                                 nullptr,
+//                                 Qt::MouseButtons(Qt::LeftButton),
+//                                 Qt::NoModifier); // why this won't work?
+//    qApp->sendEvent(&button, &dragMoveEvent); // TODO: ask Shawn if should provide drag and drop simulation
+//    QTest::qWait(200);
+    qApp->sendEvent(&button, &dragEvent);
+    // should emit released signal once draging out of boundary
+    QCOMPARE(spyPress.count(), 1);
+    QCOMPARE(button.isDown(), false);
+    QCOMPARE(spyRelease.count(), 1);
+
+}
+
+void tst_QAbstractButton::mouseRelease_data()
+{
+    QTest::addColumn<QTestEventList>("events");
+    QTest::addColumn<bool>("isDown()");
+    QTest::addColumn<int>("press count");
+    QTest::addColumn<int>("release count");
+
+
+}
 #ifdef QT_KEYPAD_NAVIGATION
 void tst_QAbstractButton::keyNavigation()
 {

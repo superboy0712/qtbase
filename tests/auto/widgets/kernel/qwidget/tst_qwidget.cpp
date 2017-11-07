@@ -3437,10 +3437,10 @@ void tst_QWidget::task110173()
     QTest::qWait(200);
 }
 
-class Widget : public QWidget
+class Combo : public QWidget
 {
 public:
-    Widget() : deleteThis(false) { setFocusPolicy(Qt::StrongFocus); }
+    Combo() : deleteThis(false) { setFocusPolicy(Qt::StrongFocus); }
     void actionEvent(QActionEvent *) { if (deleteThis) delete this; }
     void changeEvent(QEvent *) { if (deleteThis) delete this; }
     void closeEvent(QCloseEvent *) { if (deleteThis) delete this; }
@@ -3459,7 +3459,7 @@ public:
 void tst_QWidget::testDeletionInEventHandlers()
 {
     // closeEvent
-    QPointer<Widget> w = new Widget;
+    QPointer<Combo> w = new Combo;
     w->deleteThis = true;
     w->close();
     QVERIFY(w.isNull());
@@ -3475,7 +3475,7 @@ void tst_QWidget::testDeletionInEventHandlers()
     //QVERIFY(w.isNull());
 
     // key press
-    w = new Widget;
+    w = new Combo;
     w->show();
     w->deleteThis = true;
     QTest::keyPress(w, Qt::Key_A);
@@ -3483,7 +3483,7 @@ void tst_QWidget::testDeletionInEventHandlers()
     delete w;
 
     // key release
-    w = new Widget;
+    w = new Combo;
     w->show();
     w->deleteThis = true;
     QTest::keyRelease(w, Qt::Key_A);
@@ -3491,7 +3491,7 @@ void tst_QWidget::testDeletionInEventHandlers()
     delete w;
 
     // mouse press
-    w = new Widget;
+    w = new Combo;
     w->show();
     w->deleteThis = true;
     QTest::mousePress(w, Qt::LeftButton);
@@ -3499,7 +3499,7 @@ void tst_QWidget::testDeletionInEventHandlers()
     delete w;
 
     // mouse release
-    w = new Widget;
+    w = new Combo;
     w->show();
     w->deleteThis = true;
     QMouseEvent me(QEvent::MouseButtonRelease, QPoint(1, 1), Qt::LeftButton, Qt::LeftButton, 0);
@@ -3508,7 +3508,7 @@ void tst_QWidget::testDeletionInEventHandlers()
     delete w;
 
     // mouse double click
-    w = new Widget;
+    w = new Combo;
     w->show();
     w->deleteThis = true;
     QTest::mouseDClick(w, Qt::LeftButton);
@@ -3523,21 +3523,21 @@ void tst_QWidget::testDeletionInEventHandlers()
     //QVERIFY(w.isNull());
 
     // action event
-    w = new Widget;
+    w = new Combo;
     w->deleteThis = true;
     w->addAction(new QAction(w));
     QVERIFY(w.isNull());
     delete w;
 
     // change event
-    w = new Widget;
+    w = new Combo;
     w->show();
     w->deleteThis = true;
     w->setMouseTracking(true);
     QVERIFY(w.isNull());
     delete w;
 
-    w = new Widget;
+    w = new Combo;
     w->setMouseTracking(true);
     w->show();
     w->deleteThis = true;
