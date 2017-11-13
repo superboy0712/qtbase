@@ -589,16 +589,18 @@ void tst_QAbstractButton::mouseReleased() // QTBUG-53244
 //                     posOutOfWidget, Qt::NoButton,
 //                     Qt::MouseButtons(Qt::LeftButton),
 //                     Qt::NoModifier);
+    button.setAcceptDrops(true);
     QDragMoveEvent dragMoveEvent(QPoint(30, 30),
                                  Qt::IgnoreAction,
                                  nullptr,
                                  Qt::MouseButtons(Qt::LeftButton),
                                  Qt::NoModifier); // why this won't work?
-//    qApp->sendEvent(&button, &dragMoveEvent); // TODO: ask Shawn if should provide drag and drop simulation
+//    dragMoveEvent.accept();
+    qApp->sendEvent(&button, &dragMoveEvent); // TODO: ask Shawn if should provide drag and drop simulation
 //    QTest::qWait(200);
-    qApp->postEvent(&button, new auto(dragMoveEvent)); // postEvent only accept event argument allocated on heaps!
-    qApp->processEvents();
-    // should emit released signal once draging out of boundary
+//    qApp->postEvent(&button, new auto(dragMoveEvent)); // postEvent only accept event argument allocated on heaps!
+//    qApp->processEvents();
+//     should emit released signal once draging out of boundary
     QCOMPARE(spyPress.count(), 1);
     QCOMPARE(button.isDown(), false);
     QCOMPARE(spyRelease.count(), 1);
